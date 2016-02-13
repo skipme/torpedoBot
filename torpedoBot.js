@@ -237,7 +237,9 @@
                     
                     send(chatid, 'ENEMY map:\n'+battle.visualMap(ENEMY.field, _STC.emoji)+'\nYOU WON ??.');
                     send(ENEMY.chatid, 'ENEMY map:\n'+battle.visualMap(_STC.field, ENEMY.emoji)+'\nYOU LOSE ??.');
-                    this.setStateAndGo(TMAC, user, chatid, 'START')
+                    _STC.waiting = false;
+                    ENEMY.waiting = false;
+		    this.setStateAndGo(TMAC, user, chatid, 'START')
                     this.setStateAndGo(TMAC, {}, ENEMY.chatid, 'START')
                     
                     return;
