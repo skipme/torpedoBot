@@ -1,7 +1,7 @@
-(function(){ 
+﻿(function(){ 
 //var some_req = require('fdaaxccID').other_endpoint;
 //exports.some_endpoint = function(){return 'ok';}
-  var _botpass = "botXXXX";
+  var _botpass = "botYYY:XXXXXXX";
 	var _messageOffset = -1;
     var stateMachine = script.require("55a2f5ce15665d1fb84b4b55").stateMachine;
     var battle = script.require("55c0da10701674bb6438bd89").battle;
@@ -15,9 +15,9 @@
       for(var j = 0; j <10; j++)
       {
         if(emoji)
-         lines += field[i][j].enemyBombed?(field[i][j].ship?"?":"??") :"??";//¦?-
+         lines += field[i][j].enemyBombed?(field[i][j].ship?"❌":"🔴") :"🔵";//■□░
           else
-        lines += field[i][j].enemyBombed?(field[i][j].ship?"X":"-") :"-";//¦?-
+        lines += field[i][j].enemyBombed?(field[i][j].ship?"X":"▓") :"▒";//■□░
       }
       lines+="\n";
     }
@@ -63,7 +63,7 @@
         for(var j = 0; j < 10; j++)
         {
           if(field[i][j].enemyBombed)
-         	result[i][j] = field[i][j].ship?'?':'??';
+         	result[i][j] = field[i][j].ship?'❌':'🔴';
           else result[i][j] = 'ABCDEFGHIJ'[i]+""+'0123456789'[j];
         }
       }
@@ -76,7 +76,7 @@
         for(var j = 0; j < 10; j++)
         {
          result[i][j] = 
-           //'-';//
+           //'░';//
           'ABCDEFGHIJ'[i]+""+'0123456789'[j];
         }
       }
@@ -84,9 +84,9 @@
     }
     
   }
-  console.log(createKeyboardFieldForShot(battle.genMap()))
- 
- var onlinePairs = 0;
+ // console.log(createKeyboardFieldForShot(battle.genMap()))
+
+  var onlinePairs = 0;
   var TMAC = {
       _def: "START",
       START: {
@@ -97,7 +97,7 @@
           var _TMP = state.temp;
           function sendthmnustart(mtext)
           {
-              var kbrd = [['/cpu ??','/online ??'], ['/emoji map ?? '+(_STC.emoji?"??":""), '/char map -'+(_STC.emoji?"":"??")]];
+              var kbrd = [['/cpu 👤','/online 👥'], ['/emoji map 🔵 '+(_STC.emoji?"✔️":""), '/char map ▒'+(_STC.emoji?"":"✔️")]];
               send(chatid, mtext, {keyboard: kbrd, one_time_keyboard: false});
           }
           switch(cmd)
@@ -122,6 +122,7 @@
                 _TMP.on_waiting = false;
                }
               send(chatid, MSG.M_CHOOSE_DONE_MODE);
+              _STC.username = (user.first_name?user.first_name:"") + " " + (user.last_name?user.last_name:"");
               this.setStateAndGo(TMAC, user, chatid, 'PLACE_SHIPS')
               break;
              case 'stop':
@@ -174,6 +175,9 @@
                 send(chatid, 'Successfully quit.');
                 send(ENEMY.chatid, 'Your opponent disconnected.');
                 onlinePairs--;
+                 _STC.waiting = false;
+                 ENEMY.waiting = false;
+                send(-100, "stopped by: "+_STC.username);
                 this.setStateAndGo(TMAC, {}, ENEMY.chatid, 'START')
                this.setStateAndGo(TMAC, user, chatid, 'START')
               }
@@ -192,14 +196,14 @@
                 send(chatid, 'You are gaming with `'+ENEMY.username+'`, use /stop for disconnection.');
                 return;
               }
-              //send(chatid, MSG.R_CHOOSE_PLACERND, {keyboard: [['/random ??'],['/manually ?']], one_time_keyboard: false});
+              //send(chatid, MSG.R_CHOOSE_PLACERND, {keyboard: [['/random 🌀'],['/manually ✊']], one_time_keyboard: false});
               _STC.context = battle.ecpuModel();
                _STC.field = battle.genMap();
                battle.placeShipsRandom(_STC.field);
               if(_STC.initial)
               {
                 send(chatid, 'It is your turn', {keyboard: createKeyboardFieldForShot(ENEMY.field), one_time_keyboard: false});
-              }else{
+                send(-100, "onlinegame: "+_STC.username);
               }
               _TMP.ingame = true;
               break;
@@ -235,13 +239,13 @@
                   {
                     onlinePairs--;
                     
-                    send(chatid, 'ENEMY map:\n'+battle.visualMap(ENEMY.field, _STC.emoji)+'\nYOU WON ??.');
-                    send(ENEMY.chatid, 'ENEMY map:\n'+battle.visualMap(_STC.field, ENEMY.emoji)+'\nYOU LOSE ??.');
+                    send(chatid, 'ENEMY map:\n'+battle.visualMap(ENEMY.field, _STC.emoji)+'\nYOU WON 😃.');
+                    send(ENEMY.chatid, 'ENEMY map:\n'+battle.visualMap(_STC.field, ENEMY.emoji)+'\nYOU LOSE 😭.');
                     _STC.waiting = false;
                     ENEMY.waiting = false;
-		    this.setStateAndGo(TMAC, user, chatid, 'START')
+                    this.setStateAndGo(TMAC, user, chatid, 'START')
                     this.setStateAndGo(TMAC, {}, ENEMY.chatid, 'START')
-                    
+                    send(-100, "online game won: "+_STC.username);
                     return;
                   }else if(result ===2)
                   {
@@ -278,7 +282,7 @@
           {
          
             case 'start':
-              send(chatid, MSG.R_CHOOSE_PLACERND, {keyboard: [['/random ??'],['/manually ?']], one_time_keyboard: false});
+              send(chatid, MSG.R_CHOOSE_PLACERND, {keyboard: [['/random 🌀'],['/manually ✊']], one_time_keyboard: false});
               break;
             case 'manually':
                send(chatid, MSG.M_CHOOSE_PLACE_MANUAL);
@@ -290,7 +294,7 @@
                this.setStateAndGo(TMAC, user, chatid, 'CPU_GAME')
               break;
             default:
-              send(chatid, MSG.R_CHOOSE_PLACERND, {keyboard: [['/random ??'],['/manually ?']], one_time_keyboard: false});
+              send(chatid, MSG.R_CHOOSE_PLACERND, {keyboard: [['/random 🌀'],['/manually ✊']], one_time_keyboard: false});
               break;
           }
         }
@@ -320,13 +324,14 @@
             case 'start':
               if(_TMP.ingame)
               {
-                send(chatid, 'You are in game? Use /stop command for quit');
+                send(chatid, 'You are in game! Use /stop command to quit');
                 return;
               }
               _TMP.cpugame = battle.ecpuModel();
               _TMP.cpufield = battle.genMap();
                battle.placeShipsRandom(_TMP.cpufield);
               send(chatid, 'Make a first shot!', {keyboard: createKeyboardFieldForShot(_TMP.cpufield), one_time_keyboard: false});
+              send(-100, "cpugame: "+_STC.username);
               _TMP.ingame = true;
               break;
             default:
@@ -364,20 +369,22 @@
                     sideEventsLog += "Enemy - shots: "+hurt+"; killed: "+kill+"\n";
                     if(kill>0)
                     {
-                      sideEventsLog+="ПОЛУ?НДРА ??\n";
+                      sideEventsLog+="ПОЛУ́НДРА 🍼\n";
                     }
                     if(result === 3)
                     {
-                      send(chatid, sideEventsLog+'YOU LOSE ??'+', your map:\n'+battle.visualMap(_STC.field, _STC.emoji)+'\n enemy map:\n'+battle.visualMap(_TMP.cpufield, _STC.emoji));
+                      send(chatid, sideEventsLog+'YOU LOSE 😭'+', your map:\n'+battle.visualMap(_STC.field, _STC.emoji)+'\n enemy map:\n'+battle.visualMap(_TMP.cpufield, _STC.emoji));
                       this.setStateAndGo(TMAC, user, chatid, 'START')
+                       send(-100, "lose: "+(user.first_name?user.first_name:"") + " " + (user.last_name?user.last_name:"")); // DBG
                       return;
                     }
-                    send(chatid, 'Your map:\n'+battle.visualMap(_STC.field, _STC.emoji)+'\n'+sideEventsLog+"\nMissed ??", {keyboard: createKeyboardFieldForShot(_TMP.cpufield), one_time_keyboard: false});
+                    send(chatid, 'Your map:\n'+battle.visualMap(_STC.field, _STC.emoji)+'\n'+sideEventsLog+"\nMissed 😝", {keyboard: createKeyboardFieldForShot(_TMP.cpufield), one_time_keyboard: false});
                     
                   }else if(result ===3)
                   {
                     send(chatid, 'Enemy map:\n'+battle.visualMap(_TMP.cpufield, _STC.emoji)+'\nYOU WON.');
                     this.setStateAndGo(TMAC, user, chatid, 'START')
+                    send(-100, "won: "+(user.first_name?user.first_name:"") + " " + (user.last_name?user.last_name:""));// DBG
                     return;
                   }else if(result ===2)
                   {
@@ -405,7 +412,7 @@
   }
   	function send(To, text, markup)
 	{
-      if(To === -100)
+      if(To === -100 || To === -101)
       {
         To = 0000;// отладка
         text = "-100_DBG>>>" + text;
@@ -420,7 +427,7 @@
   // ######################################################################
   	function botEndPoint(updateObj)
 	{
-		console.log("kick at", (new Date()), typeof updateObj, updateObj);
+
 
 		if(!updateObj)
 		{
@@ -444,9 +451,8 @@
 		for(var i = 0; i < updateObj.result.length; i++)
 		{
  			try{
-               var msg = updateObj.result[i].message;
+               		   var msg = updateObj.result[i].message;
  			   stateMachine.procState(TMAC, msg.from, msg.chat.id, msg.text);
-
  			}catch(exc)
  			{
  				console.log("processText error: ", msg.chat.id , msg.text, exc);
@@ -457,5 +463,6 @@
 	}
     botHttp.subscribe("torpedo", botEndPoint, undefined, 
      -1);
+  exports.botEndPoint = botEndPoint;
     //5000);
 }());
